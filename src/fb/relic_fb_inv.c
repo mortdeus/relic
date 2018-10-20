@@ -532,68 +532,6 @@ void fb_inv_bruch(fb_t c, const fb_t a) {
 
 #endif
 
-#if FB_INV == CTAIA || !defined(STRIP)
-
-void fb_inv_ctaia(fb_t c, const fb_t a) {
-	fb_t r, s, t, u, v;
-	int i, k, d, r0, d0;
-
-	fb_null(r);
-	fb_null(s);
-	fb_null(u);
-	fb_null(v);
-
-	TRY {
-		fb_new(r);
-		fb_new(s);
-		fb_new(u);
-		fb_new(v);
-
-		fb_copy(r, a);
-		fb_copy(t, fb_poly_get());
-		fb_copy(s, t);
-		fb_set_dig(u, 1);
-		fb_zero(v);
-		d = -1;
-
-		for (k = 1; k < 2 * FB_BITS; k++) {
-			r0 = r[0] & 1;
-			d0 = d >> (8 * sizeof(int) - 1);
-
-			for (i = 0; i < FB_DIGS; i++) {
-				r[i] ^= (s[i] & -r0);
-				u[i] ^= (v[i] & -r0);
-				s[i] ^= (r[i] & d0);
-				v[i] ^= (u[i] & d0);
-			}
-
-			d = SEL(d, -d, r0 & -d0);
-
-			fb_rsh(r, r, 1);
-
-			r0 = u[0] & 1;
-			fb_poly_add(t, u);
-			for (i = 0; i < FB_DIGS; i++) {
-				u[i] = SEL(u[i], t[i], r0);
-			}
-			fb_rsh(u, u, 1);
-			d--;
-		}
-
-		fb_copy(c, v);
-	} CATCH_ANY {
-		THROW(ERR_CAUGHT);
-	} FINALLY {
-		fb_free(r);
-		fb_free(s);
-		fb_free(t);
-		fb_free(u);
-		fb_free(v);
-	}
-}
-
-#endif
-
 #if FB_INV == LOWER || !defined(STRIP)
 
 void fb_inv_lower(fb_t c, const fb_t a) {

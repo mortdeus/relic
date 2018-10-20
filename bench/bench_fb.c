@@ -321,10 +321,10 @@ static void arith(void) {
 	BENCH_END;
 #endif
 
-#if FB_SQR == QUICK || !defined(STRIP)
-	BENCH_BEGIN("fb_sqr_quick") {
+#if FB_SQR == LUTBL || !defined(STRIP)
+	BENCH_BEGIN("fb_sqr_lutbl") {
 		fb_rand(a);
-		BENCH_ADD(fb_sqr_quick(c, a));
+		BENCH_ADD(fb_sqr_lutbl(c, a));
 	}
 	BENCH_END;
 #endif
@@ -495,14 +495,6 @@ static void arith(void) {
 	BENCH_BEGIN("fb_inv_itoht") {
 		fb_rand(a);
 		BENCH_ADD(fb_inv_itoht(c, a));
-	}
-	BENCH_END;
-#endif
-
-#if FB_INV == CTAIA || !defined(STRIP)
-	BENCH_BEGIN("fb_inv_ctaia") {
-		fb_rand(a);
-		BENCH_ADD(fb_inv_ctaia(c, a));
 	}
 	BENCH_END;
 #endif

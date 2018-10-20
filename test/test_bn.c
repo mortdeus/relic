@@ -1002,7 +1002,7 @@ static int exponentiation(void) {
 		/* Let's try a Mersenne prime. */
 		bn_zero(p);
 		bn_set_bit(p, 127, 1);
-		bn_sub_dig(p, p, 1);
+		bn_sub(p, p, 1);
 #endif
 
 		TEST_BEGIN("modular exponentiation is correct") {
@@ -1500,9 +1500,8 @@ static int digit(void) {
 		TEST_BEGIN("division by a single digit is consistent") {
 			bn_rand(a, BN_POS, RELIC_BN_BITS);
 			bn_rand(b, BN_POS, BN_DIGIT);
-			if (bn_is_zero(b)) {
+			if (b->dp[0] == 0)
 				continue;
-			}
 			bn_div(d, a, b);
 			bn_div_dig(e, a, b->dp[0]);
 			TEST_ASSERT(bn_cmp(d, e) == CMP_EQ, end);
@@ -1554,7 +1553,7 @@ static int digit(void) {
 		/* Let's try a Mersenne prime. */
 		bn_zero(d);
 		bn_set_bit(d, 127, 1);
-		bn_sub_dig(d, d, 1);
+		bn_sub(p, p, 1);
 #endif
 
 		TEST_BEGIN("modular exponentiation with a digit is consistent") {

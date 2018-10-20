@@ -38,6 +38,7 @@
 #include "relic_trace.h"
 
 #ifdef TRACE
+#include <execinfo.h>
 #include <dlfcn.h>
 #endif
 

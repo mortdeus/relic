@@ -4,9 +4,10 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.1")
 endif()
 
 project(RELIC C CXX)
+
 set(PROJECT_VERSION_MAJOR "0")
-set(PROJECT_VERSION_MINOR "5")
-set(PROJECT_VERSION_PATCH "0")
+set(PROJECT_VERSION_MINOR "4")
+set(PROJECT_VERSION_PATCH "1")
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(VERSION ${PROJECT_VERSION})
 
@@ -51,7 +52,7 @@ option(COLOR "Build with colored output" on)
 option(BIGED "Build with big-endian support" off)
 option(SHLIB "Build shared library" on)
 option(STLIB "Build static library" on)
-option(STBIN "Build static binaries" off)
+option(STBIN "Build static binaries" on)
 option(AMALG "Build amalgamation" off)
 
 message(STATUS "Number of times each test or benchmark is ran (default = 50, 1000):\n")
@@ -86,9 +87,8 @@ message("   Note: the programmer is responsible for not using unselected modules
 
 message(STATUS "Available arithmetic backends (default = easy):\n")
 
-message("   ARITH=easy     Easy-to-understand and portable, but slow backend.")
-message("   ARITH=gmp      Backend based on GNU Multiple Precision library.\n")
-message("   ARITH=gmp-sec  Same as above, but using constant-time code.\n")
+message("   ARITH=easy     Easy-to-understand implementation.")
+message("   ARITH=gmp      GNU Multiple Precision library.\n")
 
 message(STATUS "Available memory-allocation policies (default = AUTO):\n")
 
@@ -128,7 +128,6 @@ message(STATUS "Prefix to identify this build of the library (default = \"\"):\n
 message("   LABEL=relic\n")
 
 include(cmake/arch.cmake)
-include(cmake/err.cmake)
 include(cmake/bn.cmake)
 include(cmake/fp.cmake)
 include(cmake/fpx.cmake)
@@ -141,7 +140,6 @@ include(cmake/pp.cmake)
 include(cmake/md.cmake)
 include(cmake/cp.cmake)
 include(cmake/rand.cmake)
-include(cmake/with.cmake)
 
 # Number of tests and benchmarks
 set(BENCH 100 CACHE INTEGER "Number of times each benchmark is ran.")
@@ -149,6 +147,132 @@ set(TESTS 100 CACHE INTEGER "Number of times each test is ran.")
 
 # Number of cores.
 set(CORES 1 CACHE INTEGER "Number of available processor cores.")
+
+# Default modules.
+set(WITH "ALL" CACHE STRING "Selected modules")
+LIST(FIND WITH "ALL" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_BN 1)
+	set(WITH_DV 1)
+	set(WITH_FP 1)
+	set(WITH_FPX 1)
+	set(WITH_FB 1)
+	set(WITH_FBX 1)
+	set(WITH_FT 1)
+	set(WITH_EP 1)
+	set(WITH_EPX 1)
+	set(WITH_EB 1)
+	set(WITH_ED 1)
+	set(WITH_EC 1)
+	set(WITH_PP 1)
+	set(WITH_PB 1)
+	set(WITH_PC 1)
+	set(WITH_BC 1)
+	set(WITH_MD 1)
+	set(WITH_CP 1)
+endif(TEMP GREATER -1)
+
+# Check if multiple precision integer arithmetic is required.
+LIST(FIND WITH "BN" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_BN 1)
+endif(TEMP GREATER -1)
+
+# Check if temporary vectors are required.
+LIST(FIND WITH "DV" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_DV 1)
+endif(TEMP GREATER -1)
+
+# Check if prime field arithmetic is required.
+LIST(FIND WITH "FP" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_FP 1)
+endif(TEMP GREATER -1)
+
+# Check if prime extension field arithmetic is required.
+LIST(FIND WITH "FPX" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_FPX 1)
+endif(TEMP GREATER -1)
+
+# Check if binary field arithmetic is required.
+LIST(FIND WITH "FB" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_FB 1)
+endif(TEMP GREATER -1)
+
+# Check if binary extension field arithmetic is required.
+LIST(FIND WITH "FBX" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_FBX 1)
+endif(TEMP GREATER -1)
+
+# Check if prime elliptic curve support is required.
+LIST(FIND WITH "EP" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_EP 1)
+endif(TEMP GREATER -1)
+
+#Check if support for elliptic curves defined over prime field extensions is required.
+LIST(FIND WITH "EPX" TEMP)
+if (TEMP GREATER -1)
+	set(WITH_EPX 1)
+endif(TEMP GREATER -1)
+
+# Check if binary elliptic curve support is required.
+LIST(FIND WITH "EB" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_EB 1)
+endif(TEMP GREATER -1)
+
+# Check if binary elliptic curve support is required.
+LIST(FIND WITH "ED" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_ED 1)
+endif(TEMP GREATER -1)
+
+# Check if elliptic curve cryptography support is required.
+LIST(FIND WITH "EC" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_EC 1)
+endif(TEMP GREATER -1)
+
+# Check if support for pairings over prime curves is required.
+LIST(FIND WITH "PP" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_PP 1)
+endif(TEMP GREATER -1)
+
+# Check if support for pairings over binary curves is required.
+LIST(FIND WITH "PB" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_PB 1)
+endif(TEMP GREATER -1)
+
+# Check if elliptic curve cryptography support is required.
+LIST(FIND WITH "PC" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_PC 1)
+endif(TEMP GREATER -1)
+
+# Check if support for block ciphers is required.
+LIST(FIND WITH "BC" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_BC 1)
+endif(TEMP GREATER -1)
+
+# Check if support for hash functions is required.
+LIST(FIND WITH "MD" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_MD 1)
+endif(TEMP GREATER -1)
+
+# Check if support for crptographic protocols is required.
+LIST(FIND WITH "CP" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_CP 1)
+endif(TEMP GREATER -1)
 
 # Choose the arithmetic backend.
 set(ARITH "easy" CACHE STRING "Arithmetic backend")
@@ -176,8 +300,6 @@ set(LFLAGS "${LFLAGS} ${LINK}")
 
 if(STBIN)
 	set(LFLAGS "${LFLAGS} -static")
-	set(CMAKE_LINK_SEARCH_START_STATIC ON)
-	set(CMAKE_LINK_SEARCH_END_STATIC ON)
 endif(STBIN)
 
 # Discover the operating system.
@@ -189,6 +311,8 @@ else(CMAKE_SYSTEM_NAME STREQUAL Linux)
 	else(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 		if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
 			set(OPSYS "MACOSX" CACHE STRING "Operating system")
+		else(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+			set(OPSYS "RELIC_NONE" CACHE STRING "Operating system")
 		endif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
 	endif(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 endif(CMAKE_SYSTEM_NAME STREQUAL Linux)
@@ -222,6 +346,8 @@ else(MULTI STREQUAL OPENMP)
 		find_package(Threads REQUIRED)
 		set(CFLAGS "${CFLAGS} -pthread")
 		set(MULTI "PTHREAD" CACHE STRING "Multithreading interface")
+	else(MULTI STREQUAL PTHREAD)
+		set(MULTI "RELIC_NONE" CACHE STRING "Operating system")
 	endif(MULTI STREQUAL PTHREAD)
 endif(MULTI STREQUAL OPENMP)
 

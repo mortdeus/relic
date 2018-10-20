@@ -461,6 +461,20 @@ void ep2_curve_get_ord(bn_t n);
 void ep2_curve_get_cof(bn_t h);
 
 /**
+ * Returns the sqrt(-3) mod q in the curve, where q is the prime.
+ *
+ * @param[out] h			- the returned cofactor.
+ */
+void ep2_curve_get_s3(bn_t s3);
+
+/**
+ * Returns the (sqrt(-3) - 1) / 2 mod q in the curve, where q is the prime.
+ *
+ * @param[out] h			- the returned cofactor.
+ */
+void ep2_curve_get_s32(bn_t s32);
+
+/**
  * Configures an elliptic curve over a quadratic extension by its coefficients.
  *
  * @param[in] a			- the 'a' coefficient of the curve.
@@ -940,8 +954,9 @@ void ep2_norm_sim(ep2_t *r, ep2_t *t, int n);
  * @param[out] p			- the result.
  * @param[in] msg			- the byte array to map.
  * @param[in] len			- the array length in bytes.
+ * @param[in] performHash	- whether to hash internally
  */
-void ep2_map(ep2_t p, const uint8_t *msg, int len);
+void ep2_map(ep2_t p, const uint8_t *msg, int len, int performHash);
 
 /**
  * Computes a power of the Gailbraith-Lin-Scott homomorphism of a point

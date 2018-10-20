@@ -42,7 +42,7 @@
 /* Private definitions                                                        */
 /*============================================================================*/
 
-#if RAND == HASHD
+#if RAND == HASH
 
 /*
  * Computes the hash derivation function.
@@ -52,7 +52,8 @@
  * param[in] in         - the input string.
  * param[in] in_len     - the number of bytes in the input.
  */
-static void rand_hash(uint8_t *out, int out_len, uint8_t *in, int in_len) {
+static void rand_hash(uint8_t *out, int out_len, uint8_t *in,
+		int in_len) {
 	uint32_t j = util_conv_big(8 * out_len);
 	int len = CEIL(out_len, MD_LEN);
 	uint8_t buf[1 + sizeof(uint32_t) + in_len], hash[MD_LEN];
@@ -139,7 +140,7 @@ static void rand_gen(uint8_t *out, int out_len) {
 /* Public definitions                                                         */
 /*============================================================================*/
 
-#if RAND == HASHD
+#if RAND == HASH
 
 void rand_bytes(uint8_t *buf, int size) {
 	uint8_t hash[MD_LEN];

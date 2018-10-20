@@ -399,13 +399,6 @@ static void arith2(void) {
 	}
 	BENCH_END;
 
-	BENCH_BEGIN("fp2_srt") {
-		fp2_rand(a);
-		fp2_sqr(a, a);
-		BENCH_ADD(fp2_srt(c, a));
-	}
-	BENCH_END;
-
 	BENCH_BEGIN("fp2_pck") {
 		fp2_rand(a);
 		fp2_conv_uni(a, a);

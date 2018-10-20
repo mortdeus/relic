@@ -251,7 +251,7 @@
 /** Extended Euclidean algorithm. */
 #define EXGCD    4
 /** Use implementation provided by the lower layer. */
-#define LOWER    8
+#define LOWER    7
 /** Chosen prime field inversion method. */
 #define FP_INV   @FP_INV@
 
@@ -320,7 +320,7 @@
 /** Basic squaring. */
 #define BASIC    1
 /** Table-based squaring. */
-#define QUICK    2
+#define RELIC_TABLE    2
 /** Integrated modular squaring. */
 #define INTEG	 3
 /** Chosen binary field squaring method. */
@@ -366,10 +366,8 @@
 #define ITOHT    5
 /** Hardware-friendly inversion by Brunner-Curiger-Hofstetter.*/
 #define BRUCH    6
-/** Constant-time version of almost inverse. */
-#define CTAIA    7
 /** Use implementation provided by the lower layer. */
-#define LOWER    8
+#define LOWER    7
 /** Chosen binary field inversion method. */
 #define FB_INV   @FB_INV@
 
@@ -661,32 +659,34 @@
 #define ALLOC    @ALLOC@
 
 /** NIST HASH-DRBG generator. */
-#define HASHD    1
+#define HASH     1
 /** NIST HMAC-DRBG generator. */
-#define HMACD    2
+#define RELIC_HMAC     2
 /** Operating system underlying generator. */
 #define UDEV     3
-/** FIPS 186-2 (CN1) SHA-1 based generator. */
-#define FIPS     4
 /** Intel RdRand instruction. */
-#define RDRND    5
+#define RDRND    4
+/** FIPS 186-2 (CN1) SHA-1 based generator. */
+#define FIPS     5
 /** Override library generator with the callback. */
 #define CALL     6
 /** Chosen random generator. */
 #define RAND     @RAND@
 
-/** Standard C library generator. */
-#define LIBC     1
 /** Use Windows' CryptGenRandom. */
-#define WCGR     2
+#define WCGR     1
+/** Device node generator. */
+#define DEV      2
 /** Device node generator. */
 #define UDEV     3
-/** Device node generator. */
-#define DEV      4
 /** Intel RdRand instruction. */
-#define RDRND    5
+#define RDRND    4
+/** Standard C library generator. */
+#define LIBC     5
+/** Null seed. */
+#define	ZERO     6
 /** Chosen random generator seeder. */
-#cmakedefine SEED     @SEED@
+#define SEED     @SEED@
 
 /** GNU/Linux operating system. */
 #define LINUX    1

@@ -25,7 +25,7 @@
  *
  * Implementation of the vBNN-IBS idenenty-based signature algorithm.
  *
- * Paper: "IMBAS: id-based multi-user broadcast authentication in wireless sensor networks"
+ * Paper: "IMBAS: Identity-based multi-user broadcast authentication in wireless sensor networks"
  *
  * @version $Id$
  * @ingroup cp
@@ -39,7 +39,7 @@
 /* Public definitions                                                         */
 /*============================================================================*/
 
-int cp_vbnn_gen(vbnn_kgc_t kgc) {
+int cp_vbnn_ibs_kgc_gen(vbnn_ibs_kgc_t kgc) {
 	int result = STS_OK;
 
 	/* order of the ECC group */
@@ -71,18 +71,23 @@ int cp_vbnn_gen(vbnn_kgc_t kgc) {
 	return result;
 }
 
-int cp_vbnn_gen_prv(vbnn_user_t user, vbnn_kgc_t kgc, uint8_t *id, int id_len) {
-	uint8_t hash[MD_LEN];
-	int len;
+int cp_vbnn_ibs_kgc_extract_key(vbnn_ibs_user_t user, vbnn_ibs_kgc_t kgc, uint8_t *identity, int identity_len) {
 	int result = STS_OK;
+
+	uint8_t *buffer_id_and_R;
+	int buffer_id_and_R_size;
+	int len;
+	uint8_t hash[MD_LEN];
 
 	/* order of the ECC group */
 	bn_t n;
+
 	bn_t r;
 
 	/* zero variables */
 	bn_null(n);
 	bn_null(r);
+	buffer_id_and_R = NULL;
 
 	TRY {
 		/* initialize variables */
@@ -92,19 +97,20 @@ int cp_vbnn_gen_prv(vbnn_user_t user, vbnn_kgc_t kgc, uint8_t *id, int id_len) {
 		/* get order of ECC group */
 		ec_curve_get_ord(n);
 
-		/* extract user key from id */
+		/* extract user key from identity */
 		bn_rand_mod(r, n);
 
 		/* calculate R part of the user key */
 		ec_mul_gen(user->R, r);
 
 		/* calculate s part of the user key */
-		len = id_len + ec_size_bin(user->R, 1);
-		uint8_t buffer[len];
-		memcpy(buffer, id, id_len);
-		ec_write_bin(buffer + id_len, ec_size_bin(user->R, 1), user->R, 1);
+		buffer_id_and_R_size = identity_len + ec_size_bin(user->R, 1);
+		len = buffer_id_and_R_size;
+		buffer_id_and_R = (uint8_t*)malloc(buffer_id_and_R_size);
+		memcpy(buffer_id_and_R, identity, identity_len);
+		ec_write_bin(buffer_id_and_R + identity_len, ec_size_bin(user->R, 1), user->R, 1);
 
-		md_map(hash, buffer, len);
+		md_map(hash, buffer_id_and_R, len);
 		len = MD_LEN;
 
 		if (8 * len > bn_bits(n)) {
@@ -126,16 +132,17 @@ int cp_vbnn_gen_prv(vbnn_user_t user, vbnn_kgc_t kgc, uint8_t *id, int id_len) {
 		/* free variables */
 		bn_free(n);
 		bn_free(r);
+		free(buffer_id_and_R);
 	}
 	return result;
 }
 
-int cp_vbnn_sig(ec_t sig_R, bn_t sig_z, bn_t sig_h, uint8_t *id, int id_len,
-		uint8_t *msg, int msg_len, vbnn_user_t user) {
+int cp_vbnn_ibs_user_sign(ec_t sig_R, bn_t sig_z, bn_t sig_h, uint8_t *identity, int identity_len, uint8_t *msg, int msg_len, vbnn_ibs_user_t user) {
 	int result = STS_OK;
 
-	uint8_t *buffer = NULL;
+	uint8_t *buffer_id_and_message_and_R_and_Y = NULL;
 	uint8_t *buffer_i = NULL;
+	int buffer_id_and_message_and_R_and_Y_size;
 	int len;
 	uint8_t hash[MD_LEN];
 
@@ -161,12 +168,13 @@ int cp_vbnn_sig(ec_t sig_R, bn_t sig_z, bn_t sig_h, uint8_t *id, int id_len,
 		ec_mul_gen(Y, y);
 
 		/* calculate h part of the signature */
-		len = id_len + msg_len + ec_size_bin(Y, 1) + ec_size_bin(user->R, 1);
-		buffer = (uint8_t*)malloc(len);
-		buffer_i = buffer;
+		buffer_id_and_message_and_R_and_Y_size = identity_len + msg_len + ec_size_bin(Y, 1) + ec_size_bin(user->R, 1);
+		len = buffer_id_and_message_and_R_and_Y_size;
+		buffer_id_and_message_and_R_and_Y = (uint8_t*)malloc(buffer_id_and_message_and_R_and_Y_size);
+		buffer_i = buffer_id_and_message_and_R_and_Y;
 
-		memcpy(buffer_i, id, id_len);
-		buffer_i += id_len;
+		memcpy(buffer_i, identity, identity_len);
+		buffer_i += identity_len;
 
 		memcpy(buffer_i, msg, msg_len);
 		buffer_i += msg_len;
@@ -176,7 +184,7 @@ int cp_vbnn_sig(ec_t sig_R, bn_t sig_z, bn_t sig_h, uint8_t *id, int id_len,
 
 		ec_write_bin(buffer_i, ec_size_bin(Y, 1), Y, 1);
 
-		md_map(hash, buffer, len);
+		md_map(hash, buffer_id_and_message_and_R_and_Y, len);
 		len = MD_LEN;
 
 		if (8 * len > bn_bits(n)) {
@@ -204,17 +212,17 @@ int cp_vbnn_sig(ec_t sig_R, bn_t sig_z, bn_t sig_h, uint8_t *id, int id_len,
 		bn_free(n);
 		bn_free(y);
 		ec_free(Y);
-		free(buffer);
+		free(buffer_id_and_message_and_R_and_Y);
 	}
 	return result;
 }
 
-int cp_vbnn_ver(ec_t sig_R, bn_t sig_z, bn_t sig_h, uint8_t *id, int id_len,
-		uint8_t *msg, int msg_len, ec_t mpk) {
+int cp_vbnn_ibs_user_verify(ec_t sig_R, bn_t sig_z, bn_t sig_h, uint8_t *identity, int identity_len, uint8_t *msg, int msg_len, ec_t mpk) {
 	int result = 0;
 
-	uint8_t *buffer;
+	uint8_t *buffer_hash;
 	uint8_t *buffer_i;
+	int buffer_hash_size;
 	int len;
 	uint8_t hash[MD_LEN];
 
@@ -243,16 +251,17 @@ int cp_vbnn_ver(ec_t sig_R, bn_t sig_z, bn_t sig_h, uint8_t *id, int id_len,
 		ec_curve_get_ord(n);
 
 		/* calculate c */
-		len = id_len + ec_size_bin(sig_R, 1);
-		buffer = (uint8_t*)malloc(len);
-		buffer_i = buffer;
+		buffer_hash_size = identity_len + ec_size_bin(sig_R, 1);
+		len = buffer_hash_size;
+		buffer_hash = (uint8_t*)malloc(buffer_hash_size);
+		buffer_i = buffer_hash;
 
-		memcpy(buffer_i, id, id_len);
-		buffer_i += id_len;
+		memcpy(buffer_i, identity, identity_len);
+		buffer_i += identity_len;
 
 		ec_write_bin(buffer_i, ec_size_bin(sig_R, 1), sig_R, 1);
 
-		md_map(hash, buffer, len);
+		md_map(hash, buffer_hash, len);
 		len = MD_LEN;
 
 		if (8 * len > bn_bits(n)) {
@@ -262,8 +271,8 @@ int cp_vbnn_ver(ec_t sig_R, bn_t sig_z, bn_t sig_h, uint8_t *id, int id_len,
 		} else {
 			bn_read_bin(c, hash, len);
 		}
-		free(buffer);
-		buffer = NULL;
+		free(buffer_hash);
+		buffer_hash = NULL;
 
 		/* calculate Z */
 		ec_mul_gen(Z, sig_z);
@@ -274,19 +283,20 @@ int cp_vbnn_ver(ec_t sig_R, bn_t sig_z, bn_t sig_h, uint8_t *id, int id_len,
 
 
 		/* calculate h_verify */
-		len = id_len + msg_len + ec_size_bin(sig_R, 1) + ec_size_bin(Z, 1);
-		buffer = (uint8_t*)malloc(len);
-		buffer_i = buffer;
+		buffer_hash_size = identity_len + msg_len + ec_size_bin(sig_R, 1) + ec_size_bin(Z, 1);
+		len = buffer_hash_size;
+		buffer_hash = (uint8_t*)malloc(buffer_hash_size);
+		buffer_i = buffer_hash;
 
-		memcpy(buffer_i, id, id_len);
-		buffer_i += id_len;
+		memcpy(buffer_i, identity, identity_len);
+		buffer_i += identity_len;
 		memcpy(buffer_i, msg, msg_len);
 		buffer_i += msg_len;
 		ec_write_bin(buffer_i, ec_size_bin(sig_R, 1), sig_R, 1);
 		buffer_i += ec_size_bin(sig_R, 1);
 		ec_write_bin(buffer_i, ec_size_bin(Z, 1), Z, 1);
 
-		md_map(hash, buffer, len);
+		md_map(hash, buffer_hash, len);
 		len = MD_LEN;
 
 		if (8 * len > bn_bits(n)) {

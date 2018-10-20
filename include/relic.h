@@ -75,8 +75,15 @@
 #ifndef RELIC_H
 #define RELIC_H
 
+#if defined GMP && ARITH == GMP
+#include <gmp.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "relic_arch.h"
-#include "relic_conf.h"
 #include "relic_core.h"
 #include "relic_types.h"
 #include "relic_bn.h"
@@ -97,5 +104,9 @@
 #include "relic_err.h"
 #include "relic_rand.h"
 #include "relic_util.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !RELIC_H */

@@ -505,7 +505,7 @@ static void arith2(void) {
 	BENCH_BEGIN("g2_map") {
 		uint8_t msg[5];
 		rand_bytes(msg, 5);
-		BENCH_ADD(g2_map(p, msg, 5));
+		BENCH_ADD(g2_map(p, msg, 5, 1));
 	} BENCH_END;
 
 	g2_free(p);
@@ -617,11 +617,6 @@ static void util(void) {
 		l = gt_size_bin(a, 1);
 		gt_write_bin(bin, l, a, 1);
 		BENCH_ADD(gt_read_bin(a, bin, l));
-	} BENCH_END;
-
-	BENCH_BEGIN("gt_is_valid") {
-		gt_rand(a);
-		BENCH_ADD(gt_is_valid(a));
 	} BENCH_END;
 
 	gt_free(a);

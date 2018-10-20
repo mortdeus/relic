@@ -33,7 +33,7 @@
 #include "relic.h"
 #include "relic_test.h"
 
-#if RAND == HASHD
+#if RAND == HASH
 
 /*
  * Test vectors taken from:

@@ -257,8 +257,8 @@ typedef relic_align dig_t fb_st[FB_DIGS + PADDING(FB_BYTES)/(FB_DIGIT / 8)];
  */
 #if FB_SQR == BASIC
 #define fb_sqr(C, A)	fb_sqr_basic(C, A)
-#elif FB_SQR == QUICK
-#define fb_sqr(C, A)	fb_sqr_quick(C, A)
+#elif FB_SQR == LUTBL
+#define fb_sqr(C, A)	fb_sqr_lutbl(C, A)
 #elif FB_SQR == INTEG
 #define fb_sqr(C, A)	fb_sqr_integ(C, A)
 #endif
@@ -323,18 +323,14 @@ typedef relic_align dig_t fb_st[FB_DIGS + PADDING(FB_BYTES)/(FB_DIGIT / 8)];
 #define fb_inv(C, A)	fb_inv_basic(C, A)
 #elif FB_INV == BINAR
 #define fb_inv(C, A)	fb_inv_binar(C, A)
+#elif FB_INV == LOWER
+#define fb_inv(C, A)	fb_inv_lower(C, A)
 #elif FB_INV == EXGCD
 #define fb_inv(C, A)	fb_inv_exgcd(C, A)
 #elif FB_INV == ALMOS
 #define fb_inv(C, A)	fb_inv_almos(C, A)
 #elif FB_INV == ITOHT
 #define fb_inv(C, A)	fb_inv_itoht(C, A)
-#elif FB_INV == BRUCH
-#define fb_inv(C, A)	fb_inv_bruch(C, A)
-#elif FB_INV == CTAIA
-#define fb_inv(C, A)	fb_inv_ctaia(C, A)
-#elif FB_INV == LOWER
-#define fb_inv(C, A)	fb_inv_lower(C, A)
 #endif
 
 /**
@@ -817,7 +813,7 @@ void fb_sqr_integ(fb_t c, const fb_t a);
  * @param[out] c			- the result.
  * @param[in] a				- the binary field element to square.
  */
-void fb_sqr_quick(fb_t c, const fb_t a);
+void fb_sqr_lutbl(fb_t c, const fb_t a);
 
 /**
  * Shifts a binary field element to the left. Computes c = a * z^bits mod f(z).
@@ -938,15 +934,6 @@ void fb_inv_itoht(fb_t c, const fb_t a);
  * @param[in] a				- the binary field element to invert.
  */
 void fb_inv_bruch(fb_t c, const fb_t a);
-
-/**
- * Inverts a binary field element in constant-time using
- * the Wu-Wu-Shieh-Hwang algorithm.
- *
- * @param[out] c			- the result.
- * @param[in] a				- the binary field element to invert.
- */
-void fb_inv_ctaia(fb_t c, const fb_t a);
 
 /**
  * Inverts a binary field element using a direct call to the lower layer.

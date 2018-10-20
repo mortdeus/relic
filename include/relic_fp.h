@@ -992,6 +992,15 @@ void fp_inv_monty(fp_t c, const fp_t a);
 void fp_inv_exgcd(fp_t c, const fp_t a);
 
 /**
+ * Inverts a prime field element using the Euclidean Extended Algorithm,
+ * using bns and a custum prime modulus.
+ *
+ * @param[out] c			- the result.
+ * @param[in] a				- the prime field element to invert.
+ */
+void fp_inv_exgcd_bn(bn_t c, const bn_t u, const bn_t p);
+
+/**
  * Inverts a prime field element using a direct call to the lower layer.
  *
  * @param[out] c			- the result.
